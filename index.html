@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head id="head">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' style='background:black'><text y='16' font-family='Trebuchet MS' font-weight='900' fill='orange'>UB</text></svg>">
+
+  <!--<link rel="stylesheet" href="reset.css">-->
+  <!--<link rel="stylesheet" href="base.css">-->
+  <link rel="stylesheet" href="style.css">
+  <!--<script type="module" src="app.js"></script>-->
+  <script src="script.js" defer></script>
+
+  <title>Binding Values</title>
+</head>
+
+<body id="body">
+  <dialog id="main-menu">
+    <form method="dialog">
+      <h3>What to work on?</h3>
+
+      <div class="buttons">
+        <button value="bindings">Bindings</button>
+        <button value="values">Values</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="bindings">
+    <form method="dialog">
+      <h2>Bindings</h2>
+
+      <div class="buttons">
+        <button value="values">go to Values</button>
+        <button value="create">Create</button>
+      </div>
+
+      <ul>
+        <template>
+          <li class="binding" data-id="{id}">
+            <button>{binding_name}</button>
+          </li>
+        </template>
+      </ul>
+    </form>
+  </dialog>
+</body>
+
+</html>

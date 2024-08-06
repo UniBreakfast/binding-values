@@ -1,0 +1,22 @@
+body {
+  text-align: center;
+}
+
+form>:first-child {
+  margin-top: 0;
+}
+
+form>:last-child {
+  margin-bottom: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+#bindings ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
