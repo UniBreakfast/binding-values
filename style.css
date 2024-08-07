@@ -2,6 +2,15 @@ body {
   text-align: center;
 }
 
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  margin: 1rem 0;
+}
+
 form>:first-child {
   margin-top: 0;
 }
@@ -10,13 +19,12 @@ form>:last-child {
   margin-bottom: 0;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-#bindings ul {
+.list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.buttons {
+  margin-top: 1rem;
 }

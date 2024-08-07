@@ -32,17 +32,102 @@
       <h2>Bindings</h2>
 
       <div class="buttons">
-        <button value="values">go to Values</button>
         <button value="create">Create</button>
+        <button value="values">See Values instead</button>
       </div>
 
-      <ul>
+      <hr>
+      
+      <ul class="list">
         <template>
           <li class="binding" data-id="{id}">
             <button>{binding_name}</button>
           </li>
         </template>
       </ul>
+    </form>
+  </dialog>
+
+  <dialog id="new-binding">
+    <form method="dialog">
+      <h3>Create a new binding</h3>
+
+      <label>
+        <span>Name:</span>
+        <input type="text" name="name" placeholder="identifier">
+      </label>
+      
+      <div class="buttons">
+        <button value="create">Create</button>
+        <button value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="binding">
+    <form method="dialog">
+      <h5>Binding</h5>
+      <h3>
+        <output name="name">{binding_name}</output>
+      </h3>
+
+      <input type="hidden" name="id" value="{id}">
+
+      <div class="buttons">
+        <button value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="values">
+    <form method="dialog">
+      <h2>Values</h2>
+
+      <div class="buttons">
+        <button value="create">Create</button>
+        <button value="bindings">See Bindings instead</button>
+      </div>
+
+      <hr>
+      
+      <ul class="list">
+        <template>
+          <li class="value" data-id="{id}">
+            <button>{value_datum}</button>
+          </li>
+        </template>
+      </ul>
+    </form>
+  </dialog>
+
+  <dialog id="new-value">
+    <form method="dialog">
+      <h3>Create a new value</h3>
+
+      <label>
+        <span>Datum:</span>
+        <input type="text" name="datum" placeholder="value">
+      </label>
+      
+      <div class="buttons">
+        <button value="create">Create</button>
+        <button value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="value">
+    <form method="dialog">
+      <h5>Value</h5>
+      <h3>
+        <output name="datum">{value_datum}</output>
+      </h3>
+
+      <input type="hidden" name="id" value="{id}">
+
+      <div class="buttons">
+        <button value="close">Close</button>
+      </div>
     </form>
   </dialog>
 </body>
