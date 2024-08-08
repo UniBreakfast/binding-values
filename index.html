@@ -104,10 +104,64 @@
     <form method="dialog">
       <h3>Create a new value</h3>
 
-      <label>
-        <span>Datum:</span>
-        <input type="text" name="datum" placeholder="value">
-      </label>
+      <fieldset>
+        <label>
+          <span>Type:</span>
+          <select name="type">
+            <option value="number">Number</option>
+            <option value="string">String</option>
+            <option value="boolean">Boolean</option>
+            <option value="undefined">undefined</option>
+            <option value="null">null</option>
+            <option value="bigint">BigInt</option>
+            <option value="symbol">Symbol</option>
+            <option value="object">Object</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <input type="number" name="number" placeholder="value">
+        </label>
+        
+        <label>
+          <span>Datum:</span>
+          <input type="text" name="string" placeholder="value">
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <select name="boolean">
+            <option value="true">true</option>
+            <option value="false">false</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <input name="undefined" value="undefined" readonly>
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <input name="null" value="null" readonly>
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <input type="number" name="bigint" placeholder="value">
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <input type="text" name="symbol" placeholder="value">
+        </label>
+
+        <label>
+          <span>Datum:</span>
+          <input name="object" value="{  }" readonly>
+        </label>
+      </fieldset>
       
       <div class="buttons">
         <button value="create">Create</button>
@@ -119,11 +173,17 @@
   <dialog id="value">
     <form method="dialog">
       <h5>Value</h5>
+
+      <input type="hidden" name="id" value="{id}">
+
+      <label>
+        <span>Type:</span>
+        <input name="type" value="{type}" readonly>
+      </label>
+      
       <h3>
         <output name="datum">{value_datum}</output>
       </h3>
-
-      <input type="hidden" name="id" value="{id}">
 
       <div class="buttons">
         <button value="close">Close</button>

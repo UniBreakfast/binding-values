@@ -30,9 +30,12 @@ const bindings = [
 ]
 
 const values = [
-  { id: -1, datum: 'value 1' },
-  { id: -2, datum: 'value 2' },
-  { id: -3, datum: 'value 3' },
+  { id: -1, type: 'undefined', datum: undefined },
+  { id: -2, type: 'number', datum: 42 },
+  { id: -3, type: 'string', datum: 'hello world' },
+  { id: -4, type: 'boolean', datum: false },
+  { id: -5, type: 'symbol', datum: Symbol('abc') },
+  { id: -6, type: 'object', datum: {} },
 ]
 
 let lastId = 0;
@@ -41,6 +44,7 @@ showMainMenu();
 // showBindings();
 
 window.onclick = handleClickOut;
+window.onchange = handleTypeChange;
 mainMenuForm.onsubmit = handleMenu;
 bindingsForm.onsubmit = handleBindings;
 newBindingForm.onsubmit = handleNewBinding;
@@ -59,6 +63,12 @@ function handleClickOut(e) {
     
     if (!openDialog) showMainMenu();
   }
+}
+
+function handleTypeChange(e) {
+  if (!e.target.matches('select[name="type"]')) return;
+
+  filterLabelsByType(e.target.form);
 }
 
 function handleMenu(e) {
@@ -111,9 +121,10 @@ function handleNewValue(e) {
   const btn = e.submitter;
 
   if (btn.value == 'create') {
-    const datum = newValueForm.datum.value;
+    const type = newValueForm.type.value;
+    const datum = newValueForm[type].value;
 
-    createValue(datum);
+    createValue(type, datum);
     showValues();
   }
 }
@@ -154,16 +165,32 @@ function showValues() {
 
 function showNewValueForm() {
   newValueDialog.showModal();
+
+  filterLabelsByType(newValueForm);
 }
 
 function showValue(id) {
   valueDialog.showModal();
 
   const value = values.find(v => v.id == id);
-  const { datum } = value;
+  const { type, datum } = value;
 
-  valueForm.datum.value = datum;
   valueForm.id.value = id;
+  valueForm.type.value = type;
+  valueForm.datum.value = stringifyAsStored(type, datum);
+}
+
+function filterLabelsByType(form) {
+  const selectedType = form.type.value;
+  const labels = form.querySelectorAll('label:not(:has([name="type"]))');
+  
+  for (const label of labels) {
+    const el = label.querySelector('[name]');
+    const type = el.name;
+    const matches = type == selectedType;
+    
+    label.hidden = !matches;
+  }
 }
 
 function makeBindingItem(binding) {
@@ -178,14 +205,13 @@ function makeBindingItem(binding) {
 }
 
 function makeValueItem(value) {
-  const { id, datum } = value;
+  const { id, type, datum } = value;
   const item = valueTemplate.cloneNode(true);
   const btn = item.firstElementChild;
 
   item.dataset.id = id;
 
-  if (datum) btn.innerText = datum;
-  else btn.innerHTML = '&nbsp;';  
+  btn.innerText = stringifyAsExpected(type, datum);
 
   return item;
 }
@@ -197,9 +223,44 @@ function createBinding(name) {
   bindings.unshift(binding);
 }
 
-function createValue(datum) {
+function createValue(type, datum) {
   const id = ++lastId;
-  const value = { id, datum };
+
+  if (type == 'number') datum = Number(datum);
+  if (type == 'boolean') datum = datum == 'true';
+  if (type == 'undefined') datum = undefined;
+  if (type == 'null') datum = null;
+  if (type == 'bigint') datum = BigInt(datum);
+  if (type == 'symbol') datum = Symbol(datum);
+  if (type == 'object') datum = {};
+  
+  const value = { id, type, datum };
 
   values.unshift(value);
+}
+
+function stringifyAsExpected(type, datum) {
+  if (type == 'string') return `'${datum}'`;
+
+  if (type == 'bigint') return String(datum) + 'n';
+
+  if (type == 'object') {
+    if (!Object.values(datum).length) return '{  }';
+
+    // TODO: stringify object properties
+  } 
+
+  return String(datum);
+}
+
+function stringifyAsStored(type, datum) {
+  if (type == 'symbol') return datum.description;
+
+  if (type == 'object') {
+    if (!Object.values(datum).length) return 'empty, no properties';
+
+    // TODO: stringify object properties
+  } 
+
+  return String(datum);
 }

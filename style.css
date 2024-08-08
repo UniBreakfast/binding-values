@@ -19,10 +19,27 @@ form>:last-child {
   margin-bottom: 0;
 }
 
+fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+input:is([name="undefined"], [name="null"], [name="object"], [readonly]) {
+  width: 6em;
+}
+
 .list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.list>li {
+  min-height: 1.6em;
 }
 
 .buttons {
