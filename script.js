@@ -8,6 +8,7 @@ const bindingTemplate = bindingsList.firstElementChild.content.firstElementChild
 
 const newBindingDialog = document.getElementById('new-binding');
 const newBindingForm = newBindingDialog.firstElementChild;
+const newBindingValueTemplate = newBindingForm.querySelector('template');
 
 const bindingDialog = document.getElementById('binding');
 const bindingForm = bindingDialog.firstElementChild;
@@ -24,9 +25,9 @@ const valueDialog = document.getElementById('value');
 const valueForm = valueDialog.firstElementChild;
 
 const bindings = [
-  { id: -1, name: 'binding1' },
-  { id: -2, name: 'binding2' },
-  { id: -3, name: 'binding3' },
+  { id: -1, kind: 'constant', name: 'binding1', valueId: -1 },
+  { id: -2, kind: 'constant', name: 'binding2', valueId: -2 },
+  { id: -3, kind: 'variable', name: 'binding3', valueId: -3 },
 ]
 
 const values = [
@@ -93,10 +94,12 @@ function handleNewBinding(e) {
   const btn = e.submitter;
 
   if (btn.value == 'create') {
+    const kind = newBindingForm.kind.value;
     const name = newBindingForm.name.value.trim();
+    const valueId = newBindingForm.val.value;
 
     if (name) {
-      createBinding(name);
+      createBinding(kind, name, valueId);
       showBindings();
     } else {
       newBindingForm.reset();
@@ -143,16 +146,25 @@ function showBindings() {
 
 function showNewBindingForm() {
   newBindingDialog.showModal();
+
+  const options = values.map(makeValueOption);
+  
+  newBindingForm.val.replaceChildren(...options);
 }
 
 function showBinding(id) {
   bindingDialog.showModal();
 
   const binding = bindings.find(b => b.id == id);
-  const { name } = binding;
+  const { kind, name, valueId } = binding;
+  const value = values.find(v => v.id == valueId);
+  const { type, datum } = value || {};
+  const readableValue = stringifyAsExpected(type, datum);
 
-  bindingForm.name.value = name;
   bindingForm.id.value = id;
+  bindingForm.kind.value = kind;
+  bindingForm.name.value = name;
+  bindingForm.val.value = readableValue;  
 }
 
 function showValues() {
@@ -194,12 +206,15 @@ function filterLabelsByType(form) {
 }
 
 function makeBindingItem(binding) {
-  const { id, name } = binding;
+  const { id, kind, name, valueId } = binding;
+  const value = values.find(v => v.id == valueId);
+  const {type, datum} = value || {};
+  const readableValue = stringifyAsExpected(type, datum);
   const item = bindingTemplate.cloneNode(true);
   const btn = item.firstElementChild;
 
   item.dataset.id = id;
-  btn.innerText = name;
+  btn.innerText = `${kind[0]} ${name} = ${readableValue}`;
 
   return item;
 }
@@ -216,9 +231,15 @@ function makeValueItem(value) {
   return item;
 }
 
-function createBinding(name) {
+function makeValueOption(value) {
+  const { id, type, datum } = value;
+  
+  return new Option(stringifyAsExpected(type, datum), id);
+}
+
+function createBinding(kind, name, valueId) {
   const id = ++lastId;
-  const binding = { id, name };
+  const binding = { id, kind, name, valueId };
 
   bindings.unshift(binding);
 }

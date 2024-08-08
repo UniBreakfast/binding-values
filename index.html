@@ -21,7 +21,7 @@
       <h3>What to work on?</h3>
 
       <div class="buttons">
-        <button value="bindings">Bindings</button>
+        <button value="bindings">Binding entities</button>
         <button value="values">Values</button>
       </div>
     </form>
@@ -29,7 +29,7 @@
 
   <dialog id="bindings">
     <form method="dialog">
-      <h2>Bindings</h2>
+      <h2>Binding entities</h2>
 
       <div class="buttons">
         <button value="create">Create</button>
@@ -41,7 +41,7 @@
       <ul class="list">
         <template>
           <li class="binding" data-id="{id}">
-            <button>{binding_name}</button>
+            <button>${kind} {binding_name} = {datum}</button>
           </li>
         </template>
       </ul>
@@ -52,10 +52,29 @@
     <form method="dialog">
       <h3>Create a new binding</h3>
 
-      <label>
-        <span>Name:</span>
-        <input type="text" name="name" placeholder="identifier">
-      </label>
+      <fieldset>
+        <label>
+          <span>Kind of entity:</span>
+          <select name="kind">
+            <option value="constant">constant</option>
+            <option value="variable">variable</option>
+          </select>
+        </label>
+        
+        <label>
+          <span>Name:</span>
+          <input type="text" name="name" placeholder="identifier">
+        </label>
+
+        <label>
+          <span>Value:</span>
+          <select name="val">
+            <template>
+              <option value="{id}">{datum}</option>
+            </template>
+          </select>
+        </label>
+      </fieldset>
       
       <div class="buttons">
         <button value="create">Create</button>
@@ -67,11 +86,22 @@
   <dialog id="binding">
     <form method="dialog">
       <h5>Binding</h5>
+
+      <input type="hidden" name="id" value="{id}">
+
+      <label>
+        <span>Kind of entity:</span>
+        <input name="kind" value="{kind}" readonly>
+      </label>
+      
       <h3>
         <output name="name">{binding_name}</output>
       </h3>
 
-      <input type="hidden" name="id" value="{id}">
+      <label>
+        <span>Value:</span>
+        <input name="val" value="{datum}" readonly>
+      </label>
 
       <div class="buttons">
         <button value="close">Close</button>
