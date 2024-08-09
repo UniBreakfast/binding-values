@@ -212,9 +212,10 @@ function makeBindingItem(binding) {
   const readableValue = stringifyAsExpected(type, datum);
   const item = bindingTemplate.cloneNode(true);
   const btn = item.firstElementChild;
+  const label = kind == 'constant' ? `<u>${name}</u>` : `<i>${name}</i>`;
 
   item.dataset.id = id;
-  btn.innerText = `${kind[0]} ${name} = ${readableValue}`;
+  btn.innerHTML = `${label} = ${readableValue}`;
 
   return item;
 }

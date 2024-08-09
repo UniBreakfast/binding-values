@@ -28,6 +28,10 @@ fieldset {
   border: none;
 }
 
+legend {
+  font-size: x-small;
+}
+
 input:is([name="undefined"], [name="null"], [name="object"], [readonly]) {
   width: 6em;
 }
