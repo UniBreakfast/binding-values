@@ -8,10 +8,15 @@ const bindingTemplate = bindingsList.firstElementChild.content.firstElementChild
 
 const newBindingDialog = document.getElementById('new-binding');
 const newBindingForm = newBindingDialog.firstElementChild;
-const newBindingValueTemplate = newBindingForm.querySelector('template');
 
 const bindingDialog = document.getElementById('binding');
 const bindingForm = bindingDialog.firstElementChild;
+const reassignBtn = bindingForm.querySelector('[value="reassign"]');
+
+const selectValueDialog = document.getElementById('select-value');
+const selectValueForm = selectValueDialog.firstElementChild;
+const selectValueList = selectValueForm.querySelector('ul');
+const selectValueTemplate = selectValueList.firstElementChild.content.firstElementChild;
 
 const valuesDialog = document.getElementById('values');
 const valuesForm = valuesDialog.firstElementChild;
@@ -20,6 +25,9 @@ const valueTemplate = valuesList.firstElementChild.content.firstElementChild;
 
 const newValueDialog = document.getElementById('new-value');
 const newValueForm = newValueDialog.firstElementChild;
+
+const duplicateDialog = document.getElementById('duplicate');
+const duplicateForm = duplicateDialog.firstElementChild;
 
 const valueDialog = document.getElementById('value');
 const valueForm = valueDialog.firstElementChild;
@@ -44,10 +52,12 @@ let lastId = 0;
 showMainMenu();
 // showBindings();
 
-window.onclick = handleClickOut;
+window.onpointerdown = handleClickOut;
 window.onchange = handleTypeChange;
 mainMenuForm.onsubmit = handleMenu;
 bindingsForm.onsubmit = handleBindings;
+bindingForm.onsubmit = handleBinding;
+selectValueForm.onsubmit = handleSelectValue;
 newBindingForm.onsubmit = handleNewBinding;
 valuesForm.onsubmit = handleValues;
 newValueForm.onsubmit = handleNewValue;
@@ -64,7 +74,7 @@ function handleClickOut(e) {
     
     if (!openDialog) showMainMenu();
   }
-}
+} 
 
 function handleTypeChange(e) {
   if (!e.target.matches('select[name="type"]')) return;
@@ -109,6 +119,27 @@ function handleNewBinding(e) {
   }
 }
 
+function handleBinding(e) {
+  const btn = e.submitter;
+
+  if (btn.value == 'reassign') {
+    e.preventDefault();
+    
+    const id = bindingForm.id.value;
+
+    showSelectValue(id);
+  }
+}
+
+function handleSelectValue(e) {
+  const btn = e.submitter;
+  const id = selectValueForm.id.value;
+  const li = btn.closest('li');
+  const valueId = li?.dataset.id;
+  
+  if (valueId) reassignBinding(id, valueId), showBinding(id);
+}
+
 function handleValues(e) {
   const btn = e.submitter;
   const li = btn.closest('li');
@@ -127,6 +158,7 @@ function handleNewValue(e) {
     const type = newValueForm.type.value;
     const datum = newValueForm[type].value;
 
+    newValueForm.reset();
     createValue(type, datum);
     showValues();
   }
@@ -165,6 +197,25 @@ function showBinding(id) {
   bindingForm.kind.value = kind;
   bindingForm.name.value = name;
   bindingForm.val.value = readableValue;  
+  bindingForm.reassign.disabled = kind == 'constant';
+  bindingForm.reassign.title = kind == 'constant' ? 'Cannot reassign constant' : '';
+}
+
+function showSelectValue(id) {
+  const binding = bindings.find(b => b.id == id);
+  const { kind, name, valueId } = binding;
+  
+  selectValueDialog.showModal();
+  selectValueForm.id.value = id;
+  selectValueForm.label.value = `${kind} ${name}`;
+
+  const selectValueItems = values.map(makeValueItem);
+  const currentValueItem = selectValueItems.find(item => item.dataset.id == valueId);
+  const currentValueButton = currentValueItem.firstElementChild;
+
+  selectValueList.replaceChildren(...selectValueItems);
+  currentValueButton.disabled = true;
+  currentValueButton.title = 'Current value';
 }
 
 function showValues() {
@@ -179,6 +230,16 @@ function showNewValueForm() {
   newValueDialog.showModal();
 
   filterLabelsByType(newValueForm);
+}
+
+function showDuplicateDialog(id) {
+  duplicateDialog.showModal();
+
+  const value = values.find(v => v.id == id);
+  const { type, datum } = value;
+
+  duplicateForm.type.value = type;
+  duplicateForm.datum.value = stringifyAsStored(type, datum);
 }
 
 function showValue(id) {
@@ -256,9 +317,25 @@ function createValue(type, datum) {
   if (type == 'symbol') datum = Symbol(datum);
   if (type == 'object') datum = {};
   
+  const dupId = checkForDuplicateValue(datum);
+
+  if (dupId) return showDuplicateDialog(dupId);
+  
   const value = { id, type, datum };
 
   values.unshift(value);
+}
+
+function checkForDuplicateValue(datum) {
+  const value = values.find(v => v.datum === datum);
+
+  return value?.id;
+}
+
+function reassignBinding(id, valueId) {
+  const binding = bindings.find(b => b.id == id);
+
+  binding.valueId = valueId;
 }
 
 function stringifyAsExpected(type, datum) {

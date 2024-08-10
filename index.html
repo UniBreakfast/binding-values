@@ -37,7 +37,7 @@
       </div>
 
       <hr>
-      
+
       <ul class="list">
         <template>
           <li class="binding" data-id="{id}">
@@ -64,7 +64,7 @@
             <option value="variable">variable</option>
           </select>
         </label>
-        
+
         <label>
           <span>Name:</span>
           <input type="text" name="name" placeholder="identifier">
@@ -79,7 +79,7 @@
           </select>
         </label>
       </fieldset>
-      
+
       <div class="buttons">
         <button value="create">Create</button>
         <button value="cancel">Cancel</button>
@@ -97,22 +97,50 @@
         <span>Kind of entity:</span>
         <input name="kind" value="{kind}" readonly>
       </label>
-      
+
       <h3>
         <output name="name">{binding_name}</output>
       </h3>
 
       <label>
         <span>Value:</span>
+
         <input name="val" value="{datum}" readonly>
       </label>
 
       <div class="buttons">
+        <button value="reassign" name="reassign" disabled>Reassign</button>
         <button value="close">Close</button>
       </div>
     </form>
   </dialog>
 
+  <dialog id="select-value">
+    <form method="dialog">
+      <h4>Select new value for</h4>
+
+      <input type="hidden" name="id" value="{id}">
+
+      <h3>
+        <output name="label">{kind} {binding_name}</output>
+      </h3>
+
+      <ul class="list">
+        <template>
+          <li class="value" data-id="{id}">
+            <button>{value_datum}</button>
+          </li>
+        </template>
+      </ul>
+
+      <hr>
+
+      <div class="buttons">
+        <button value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+  
   <dialog id="values">
     <form method="dialog">
       <h2>Values</h2>
@@ -123,7 +151,7 @@
       </div>
 
       <hr>
-      
+
       <ul class="list">
         <template>
           <li class="value" data-id="{id}">
@@ -157,7 +185,7 @@
           <span>Datum:</span>
           <input type="number" name="number" placeholder="value">
         </label>
-        
+
         <label>
           <span>Datum:</span>
           <input type="text" name="string" placeholder="value">
@@ -196,10 +224,27 @@
           <input name="object" value="{  }" readonly>
         </label>
       </fieldset>
-      
+
       <div class="buttons">
         <button value="create">Create</button>
         <button value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="duplicate">
+    <form method="dialog">
+      <h4>Value (primitive) already exists</h4>
+
+      <h3>
+        <output name="type">{type}</output>
+        <output name="datum">{value_datum}</output>
+      </h3>
+
+      <p>New value was not created to not waste memory.</p>
+
+      <div class="buttons">
+        <button value="close">Close</button>
       </div>
     </form>
   </dialog>
@@ -214,7 +259,7 @@
         <span>Type:</span>
         <input name="type" value="{type}" readonly>
       </label>
-      
+
       <h3>
         <output name="datum">{value_datum}</output>
       </h3>
