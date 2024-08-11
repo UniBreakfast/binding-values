@@ -64,6 +64,7 @@ selectValueForm.onsubmit = handleSelectValue;
 newBindingForm.onsubmit = handleNewBinding;
 valuesForm.onsubmit = handleValues;
 newValueForm.onsubmit = handleNewValue;
+valueForm.onsubmit = handleValue;
 
 function handleClickOut(e) {
   if (!e.target.matches('dialog:not(#main-menu)')) return;
@@ -165,6 +166,14 @@ function handleNewValue(e) {
   }
 }
 
+function handleValue(e) {
+  const btn = e.submitter;
+  const li = btn.closest('li');
+  const id = li?.dataset.id;
+
+  if (id) e.preventDefault(), showBinding(id);
+}
+
 function showMainMenu() {
   mainDialog.showModal();
 }
@@ -186,6 +195,7 @@ function showNewBindingForm() {
 }
 
 function showBinding(id) {
+  bindingDialog.close();
   bindingDialog.showModal();
 
   const binding = bindings.find(b => b.id == id);
@@ -244,6 +254,7 @@ function showDuplicateDialog(id) {
 }
 
 function showValue(id) {
+  valueDialog.close();
   valueDialog.showModal();
 
   const value = values.find(v => v.id == id);

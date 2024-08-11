@@ -5,6 +5,6 @@
 - [x] do not create duplicate primitives
 - [x] show value bindings
 - [x] open value from binding
-- [ ] open binding from value
+- [x] open binding from value
 - [ ] collect garbage
 - [ ] add properties
