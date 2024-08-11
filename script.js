@@ -124,14 +124,12 @@ function handleNewBinding(e) {
 
 function handleBinding(e) {
   const btn = e.submitter;
+  const id = bindingForm.id.value;
+  const valueId = getValue(id).id;
 
-  if (btn.value == 'reassign') {
-    e.preventDefault();
-    
-    const id = bindingForm.id.value;
-
-    showSelectValue(id);
-  }
+  if (btn.value == 'value') e.preventDefault(), showValue(valueId)
+  
+  if (btn.value == 'reassign') e.preventDefault(), showSelectValue(id);
 }
 
 function handleSelectValue(e) {
@@ -358,6 +356,12 @@ function checkForDuplicateValue(datum) {
 
 function getBindings(valueId) {
   return bindings.filter(b => b.valueId == valueId);
+}
+
+function getValue(bindingId) {
+  const binding = bindings.find(b => b.id == bindingId);
+
+  return values.find(v => v.id == binding.valueId);
 }
 
 function reassignBinding(id, valueId) {

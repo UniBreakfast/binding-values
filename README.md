@@ -4,7 +4,7 @@
 - [x] reassign
 - [x] do not create duplicate primitives
 - [x] show value bindings
-- [ ] open value from binding
+- [x] open value from binding
 - [ ] open binding from value
 - [ ] collect garbage
 - [ ] add properties
