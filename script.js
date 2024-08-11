@@ -31,6 +31,9 @@ const duplicateForm = duplicateDialog.firstElementChild;
 
 const valueDialog = document.getElementById('value');
 const valueForm = valueDialog.firstElementChild;
+const valueBoundLabel = valueForm.querySelector('.bound');
+const valueBindingList = valueForm.querySelector('ul');
+const valueBindingTemplate = valueBindingList.firstElementChild.content.firstElementChild;
 
 const bindings = [
   { id: -1, kind: 'constant', name: 'binding1', valueId: -1 },
@@ -247,10 +250,16 @@ function showValue(id) {
 
   const value = values.find(v => v.id == id);
   const { type, datum } = value;
+  const bindings = getBindings(id);
 
   valueForm.id.value = id;
   valueForm.type.value = type;
   valueForm.datum.value = stringifyAsStored(type, datum);
+  valueBoundLabel.hidden = !bindings.length;
+
+  const bindingItems = bindings.map(makeBindingNameItem);
+
+  valueBindingList.replaceChildren(...bindingItems);
 }
 
 function filterLabelsByType(form) {
@@ -281,14 +290,29 @@ function makeBindingItem(binding) {
   return item;
 }
 
+function makeBindingNameItem(binding) {
+  const { id, kind, name } = binding;
+
+  const item = valueBindingTemplate.cloneNode(true);
+  const button = item.firstElementChild;
+  const label = kind == 'constant' ? `<u>${name}</u>` : `<i>${name}</i>`;
+
+  item.dataset.id = id;
+  button.innerHTML = label;
+
+  return item;
+}
+
 function makeValueItem(value) {
   const { id, type, datum } = value;
   const item = valueTemplate.cloneNode(true);
-  const btn = item.firstElementChild;
+  const [btn, span] = item.children;
 
   item.dataset.id = id;
 
   btn.innerText = stringifyAsExpected(type, datum);
+
+  if (getBindings(id).length) span.remove();
 
   return item;
 }
@@ -330,6 +354,10 @@ function checkForDuplicateValue(datum) {
   const value = values.find(v => v.datum === datum);
 
   return value?.id;
+}
+
+function getBindings(valueId) {
+  return bindings.filter(b => b.valueId == valueId);
 }
 
 function reassignBinding(id, valueId) {

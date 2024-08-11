@@ -156,6 +156,7 @@
         <template>
           <li class="value" data-id="{id}">
             <button>{value_datum}</button>
+            <span class="unbound" title="will be collected by Garbage Collector if not bound to an entity">unbound - garbage?</span>
           </li>
         </template>
       </ul>
@@ -263,6 +264,18 @@
       <h3>
         <output name="datum">{value_datum}</output>
       </h3>
+
+      <label class="bound">
+        <span>Bound to:</span>
+        
+        <ul class="list">
+          <template>
+            <li class="binding" data-id="{id}">
+              <button>{binding_name}</button>
+            </li>
+          </template>
+        </ul>
+      </label>
 
       <div class="buttons">
         <button value="close">Close</button>

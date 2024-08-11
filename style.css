@@ -46,10 +46,14 @@ input:is([name="undefined"], [name="null"], [name="object"], [readonly]) {
   min-height: 1.6em;
 }
 
-#select-value .list {
+#select-value .list, #value .list {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.unbound {
+  font-size: x-small;
 }
 
 .buttons {
