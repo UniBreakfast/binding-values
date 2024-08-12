@@ -49,6 +49,10 @@
       <legend>
         <u>constant</u>, <i>variable</i>
       </legend>
+
+      <div class="buttons">
+        <button value="close">Close</button>
+      </div>
     </form>
   </dialog>
 
@@ -126,7 +130,7 @@
         <output name="label">{kind} {binding_name}</output>
       </h3>
 
-      <ul class="list">
+      <ul class="list row-list">
         <template>
           <li class="value" data-id="{id}">
             <button>{value_datum}</button>
@@ -156,11 +160,17 @@
       <ul class="list">
         <template>
           <li class="value" data-id="{id}">
-            <button>{value_datum}</button>
-            <span class="unbound" title="will be collected by Garbage Collector if not bound to an entity">unbound - garbage?</span>
+            <button class="unbound" title="will be collected by Garbage Collector if not bound to an entity">{value_datum}</button>
           </li>
         </template>
       </ul>
+
+      <hr>
+
+      <div class="buttons">
+        <button value="garbage">Collect Garbage</button>
+        <button value="close">Close</button>
+      </div>
     </form>
   </dialog>
 
@@ -269,7 +279,7 @@
       <label class="bound">
         <span>Bound to:</span>
         
-        <ul class="list">
+        <ul class="list row-list">
           <template>
             <li class="binding" data-id="{id}">
               <button>{binding_name}</button>

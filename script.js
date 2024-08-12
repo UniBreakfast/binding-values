@@ -100,10 +100,11 @@ function handleBindings(e) {
 
   if (btn.value == 'values') showValues();
   if (btn.value == 'create') e.preventDefault(), showNewBindingForm();
-
+  if (btn.value == 'close') showMainMenu();
+  
   if (li) e.preventDefault(), showBinding(id);
 }
-
+  
 function handleNewBinding(e) {
   const btn = e.submitter;
 
@@ -139,7 +140,15 @@ function handleSelectValue(e) {
   const li = btn.closest('li');
   const valueId = li?.dataset.id;
   
-  if (valueId) reassignBinding(id, valueId), showBinding(id);
+  if (valueId) {
+    reassignBinding(id, valueId);
+    
+    if (bindingsDialog.open) showBindings();
+    if (valuesDialog.open) showValues();
+    if (valueDialog.open) showValue(valueForm.id.value);
+    
+    showBinding(id);
+  }
 }
 
 function handleValues(e) {
@@ -149,6 +158,8 @@ function handleValues(e) {
 
   if (btn.value == 'bindings') showBindings();
   if (btn.value == 'create') e.preventDefault(), showNewValueForm();
+  if (btn.value == 'close') showMainMenu();
+  if (btn.value == 'garbage') e.preventDefault(), collectGarbage(), showValues();
 
   if (li) e.preventDefault(), showValue(id);
 }
@@ -315,13 +326,13 @@ function makeBindingNameItem(binding) {
 function makeValueItem(value) {
   const { id, type, datum } = value;
   const item = valueTemplate.cloneNode(true);
-  const [btn, span] = item.children;
+  const btn = item.firstElementChild;
 
   item.dataset.id = id;
 
   btn.innerText = stringifyAsExpected(type, datum);
 
-  if (getBindings(id).length) span.remove();
+  if (getBindings(id).length) btn.classList.remove('unbound');
 
   return item;
 }
@@ -363,6 +374,14 @@ function checkForDuplicateValue(datum) {
   const value = values.find(v => v.datum === datum);
 
   return value?.id;
+}
+
+function collectGarbage() {
+  const boundIds = new Set(bindings.map(b => b.valueId));
+  const boundValues = values.filter(v => boundIds.has(v.id));
+
+  values.length = 0;
+  values.push(...boundValues);
 }
 
 function getBindings(valueId) {

@@ -44,16 +44,42 @@ input:is([name="undefined"], [name="null"], [name="object"], [readonly]) {
 
 .list>li {
   min-height: 1.6em;
+  min-width: 2.5em;
 }
 
-#select-value .list, #value .list {
+.row-list {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .unbound {
-  font-size: x-small;
+  position: relative;
+
+  .list:not(.row-list) & {
+    left: 12px;
+
+    &::before {
+      content: "♺";
+      font-size: large;
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      translate: -20px -50%;
+    }
+  }
+
+  &::after {
+    font-size: smaller;
+    font-style: italic;
+    content: "unbound";
+    position: absolute;
+    bottom: 79%;
+    left: 50%;
+    translate: -50%;
+    --s: 0 0 3px white;
+    text-shadow: var(--s), var(--s), var(--s), var(--s), var(--s), var(--s), var(--s), var(--s), var(--s), var(--s), var(--s);
+  }
 }
 
 .buttons {
