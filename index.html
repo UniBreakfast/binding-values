@@ -32,8 +32,8 @@
       <h2>Binding entities</h2>
 
       <div class="buttons">
-        <button value="create">Create</button>
-        <button value="values">See Values instead</button>
+        <button value="create">Create new binding</button>
+        <button value="values">See values</button>
       </div>
 
       <hr>
@@ -47,7 +47,9 @@
       </ul>
 
       <legend>
-        <u>constant</u>, <i>variable</i>
+        <u>constant</u> = &nbsp &nbsp &nbsp &nbsp
+        <i>variable</i> = &nbsp &nbsp &nbsp &nbsp
+        property:
       </legend>
 
       <div class="buttons">
@@ -66,15 +68,27 @@
           <select name="kind">
             <option value="constant">constant</option>
             <option value="variable">variable</option>
+            <option value="property">property</option>
           </select>
         </label>
+
+        <label class="object" hidden>
+          <span>of object:</span>
+          <select name="object">
+            <template>
+              <option value="{id}">{datum} bound to {binding_name}</option>
+            </template>
+          </select>
+        </label>
+
+        <span hidden>You need to create an object first!</span>
 
         <label>
           <span>Name:</span>
           <input type="text" name="name" placeholder="identifier">
         </label>
 
-        <label>
+        <label class="value">
           <span>Value:</span>
           <select name="val">
             <template>
@@ -82,10 +96,12 @@
             </template>
           </select>
         </label>
+
+        <span hidden>You need to create some value first!</span>
       </fieldset>
 
       <div class="buttons">
-        <button value="create">Create</button>
+        <button name="create" value="create">Create</button>
         <button value="cancel">Cancel</button>
       </div>
     </form>
@@ -145,14 +161,14 @@
       </div>
     </form>
   </dialog>
-  
+
   <dialog id="values">
     <form method="dialog">
       <h2>Values</h2>
 
       <div class="buttons">
-        <button value="create">Create</button>
-        <button value="bindings">See Bindings instead</button>
+        <button value="create">Create new value</button>
+        <button value="bindings">See bindings</button>
       </div>
 
       <hr>
@@ -267,26 +283,46 @@
 
       <input type="hidden" name="id" value="{id}">
 
-      <label>
-        <span>Type:</span>
-        <input name="type" value="{type}" readonly>
-      </label>
+      <fieldset>
+        <label>
+          <span>Type:</span>
+          <input name="type" value="{type}" readonly>
+        </label>
 
-      <h3>
-        <output name="datum">{value_datum}</output>
-      </h3>
+        <h3 class="datum">
+          <output name="datum">{value_datum}</output>
+        </h3>
 
-      <label class="bound">
-        <span>Bound to:</span>
-        
-        <ul class="list row-list">
-          <template>
-            <li class="binding" data-id="{id}">
-              <button>{binding_name}</button>
-            </li>
-          </template>
-        </ul>
-      </label>
+        <label hidden>
+          <span>properties:</span>
+
+          <ul class="list row-list">
+            <template>
+              <li class="property" data-id="{id}">
+                <button>{property_name}: {property_value}</button>
+              </li>
+            </template>
+          </ul>
+        </label>
+
+        <label class="bound">
+          <span>Bound to:</span>
+
+          <ul class="list row-list">
+            <template>
+              <li class="binding" data-id="{id}">
+                <button>{binding_name}</button>
+              </li>
+            </template>
+          </ul>
+
+          <legend>
+            <u>constant</u> &nbsp &nbsp &nbsp &nbsp
+            <i>variable</i> &nbsp &nbsp &nbsp &nbsp
+            .property
+          </legend>
+        </label>
+      </fieldset>
 
       <div class="buttons">
         <button value="close">Close</button>

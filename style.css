@@ -61,11 +61,11 @@ input:is([name="undefined"], [name="null"], [name="object"], [readonly]) {
 
     &::before {
       content: "♺";
-      font-size: large;
+      font-size: x-large;
       position: absolute;
       right: 100%;
       top: 50%;
-      translate: -20px -50%;
+      translate: -12px -55%;
     }
   }
 

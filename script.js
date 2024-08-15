@@ -8,6 +8,10 @@ const bindingTemplate = bindingsList.firstElementChild.content.firstElementChild
 
 const newBindingDialog = document.getElementById('new-binding');
 const newBindingForm = newBindingDialog.firstElementChild;
+const newBindingObjectLabel = newBindingForm.querySelector('.object');
+const noObjectsSpan = newBindingObjectLabel.nextElementSibling;
+const newBindingValueLabel = newBindingForm.querySelector('.value');
+const noValuesSpan = newBindingValueLabel.nextElementSibling;
 
 const bindingDialog = document.getElementById('binding');
 const bindingForm = bindingDialog.firstElementChild;
@@ -31,14 +35,21 @@ const duplicateForm = duplicateDialog.firstElementChild;
 
 const valueDialog = document.getElementById('value');
 const valueForm = valueDialog.firstElementChild;
+const valueDatumLabel = valueForm.querySelector('.datum');
+const valuePropsLabel = valueDatumLabel.nextElementSibling;
+const valuePropsList = valuePropsLabel.querySelector('ul');
+const valuePropsTemplate = valuePropsList.firstElementChild.content.firstElementChild;
 const valueBoundLabel = valueForm.querySelector('.bound');
-const valueBindingList = valueForm.querySelector('ul');
+const valueBindingList = valueBoundLabel.querySelector('ul');
 const valueBindingTemplate = valueBindingList.firstElementChild.content.firstElementChild;
 
 const bindings = [
   { id: -1, kind: 'constant', name: 'binding1', valueId: -1 },
   { id: -2, kind: 'constant', name: 'binding2', valueId: -2 },
   { id: -3, kind: 'variable', name: 'binding3', valueId: -3 },
+  { id: -4, kind: 'constant', name: 'obj', valueId: -6 },
+  { id: -5, kind: 'property', name: 'a', valueId: -2, objectId: -6 },
+  { id: -6, kind: 'property', name: 'b', valueId: -3, objectId: -6 },
 ]
 
 const values = [
@@ -61,6 +72,7 @@ mainMenuForm.onsubmit = handleMenu;
 bindingsForm.onsubmit = handleBindings;
 bindingForm.onsubmit = handleBinding;
 selectValueForm.onsubmit = handleSelectValue;
+newBindingForm.kind.onchange = showNewBindingForm;
 newBindingForm.onsubmit = handleNewBinding;
 valuesForm.onsubmit = handleValues;
 newValueForm.onsubmit = handleNewValue;
@@ -104,22 +116,30 @@ function handleBindings(e) {
   
   if (li) e.preventDefault(), showBinding(id);
 }
+
+function handleKindChange() {
+  const kind = newBindingForm.kind.value;
+
+  newBindingObjectDiv.hidden = kind != 'property'; 
+}
   
 function handleNewBinding(e) {
   const btn = e.submitter;
 
   if (btn.value == 'create') {
     const kind = newBindingForm.kind.value;
+    const objectId = +newBindingForm.object.value;
     const name = newBindingForm.name.value.trim();
-    const valueId = newBindingForm.val.value;
+    const valueId = +newBindingForm.val.value;
 
-    if (name) {
-      createBinding(kind, name, valueId);
-      showBindings();
-    } else {
-      newBindingForm.reset();
+    if (!name) {
+      newBindingForm.name.value = '';
       newBindingForm.name.focus();
       e.preventDefault();
+    } else {
+      createBinding(kind, name, valueId, objectId);
+      showBindings();
+      newBindingForm.name.value = '';
     }
   }
 }
@@ -200,9 +220,20 @@ function showBindings() {
 function showNewBindingForm() {
   newBindingDialog.showModal();
 
-  const options = values.map(makeValueOption);
+  const objectValues = values.filter(v => v.type == 'object');
+  const objectOptions = objectValues.map(makeObjectOption);
+  const valueOptions = values.map(makeValueOption);
+  const noObjects = !objectValues.length;
+  const noValues = !valueOptions.length;
+  const propSelected = newBindingForm.kind.value == 'property';
   
-  newBindingForm.val.replaceChildren(...options);
+  newBindingForm.object.replaceChildren(...objectOptions);
+  newBindingForm.val.replaceChildren(...valueOptions);
+  newBindingObjectLabel.hidden = !propSelected || noObjects;
+  noObjectsSpan.hidden = !propSelected || !noObjects;
+  newBindingValueLabel.hidden = noValues;
+  noValuesSpan.hidden = !noValues;
+  newBindingForm.create.disabled = propSelected && noObjects || noValues;
 }
 
 function showBinding(id) {
@@ -271,14 +302,19 @@ function showValue(id) {
   const value = values.find(v => v.id == id);
   const { type, datum } = value;
   const bindings = getBindings(id);
-
+  const properties = getProperties(id);
+  const noProperties = !properties.length;
+  const propertyItems = properties.map(makePropertyItem);
+  const bindingItems = bindings.map(makeBindingNameItem);
+  
   valueForm.id.value = id;
   valueForm.type.value = type;
   valueForm.datum.value = stringifyAsStored(type, datum);
+  valueDatumLabel.hidden = !noProperties;
+  valuePropsLabel.hidden = noProperties;
   valueBoundLabel.hidden = !bindings.length;
 
-  const bindingItems = bindings.map(makeBindingNameItem);
-
+  valuePropsList.replaceChildren(...propertyItems);
   valueBindingList.replaceChildren(...bindingItems);
 }
 
@@ -302,10 +338,12 @@ function makeBindingItem(binding) {
   const readableValue = stringifyAsExpected(type, datum);
   const item = bindingTemplate.cloneNode(true);
   const btn = item.firstElementChild;
-  const label = kind == 'constant' ? `<u>${name}</u>` : `<i>${name}</i>`;
+  const label = kind == 'constant' ? `<u>${name}</u> =` : 
+    kind == 'variable' ? `<i>${name}</i> =` : `${name}:`;
 
   item.dataset.id = id;
-  btn.innerHTML = `${label} = ${readableValue}`;
+  btn.innerHTML = `${label} ${readableValue}`;
+  btn.title = kind;
 
   return item;
 }
@@ -315,10 +353,25 @@ function makeBindingNameItem(binding) {
 
   const item = valueBindingTemplate.cloneNode(true);
   const button = item.firstElementChild;
-  const label = kind == 'constant' ? `<u>${name}</u>` : `<i>${name}</i>`;
+  const label = kind == 'constant' ? `<u>${name}</u>` : 
+    kind == 'variable' ? `<i>${name}</i>` : `.${name}`
 
   item.dataset.id = id;
   button.innerHTML = label;
+  button.title = kind;
+  return item;
+}
+
+function makePropertyItem(binding) {
+  const { id, name, valueId } = binding;
+  const value = values.find(v => v.id == valueId);
+  const {type, datum} = value || {};
+  const readableValue = stringifyAsExpected(type, datum);
+  const item = valuePropsTemplate.cloneNode(true);
+  const btn = item.firstElementChild;
+
+  item.dataset.id = id;
+  btn.innerHTML = `${name}: ${readableValue}`;
 
   return item;
 }
@@ -343,9 +396,21 @@ function makeValueOption(value) {
   return new Option(stringifyAsExpected(type, datum), id);
 }
 
-function createBinding(kind, name, valueId) {
+function makeObjectOption(value) {
+  const { id, type, datum } = value;
+  const names = getBindings(id).map(b => b.name); 
+  const label = names.length ? 
+    `${stringifyAsExpected(type, datum)} bound to ${names.join(', ')}` :
+    `unbound ${stringifyAsExpected(type, datum)}`;
+  
+  return new Option(label, id);
+}
+
+function createBinding(kind, name, valueId, objectId) {
   const id = ++lastId;
   const binding = { id, kind, name, valueId };
+
+  if (kind == 'property') binding.objectId = objectId;
 
   bindings.unshift(binding);
 }
@@ -388,6 +453,10 @@ function getBindings(valueId) {
   return bindings.filter(b => b.valueId == valueId);
 }
 
+function getProperties(objectId) {
+  return bindings.filter(b => b.objectId == objectId);
+}
+
 function getValue(bindingId) {
   const binding = bindings.find(b => b.id == bindingId);
 
@@ -406,9 +475,10 @@ function stringifyAsExpected(type, datum) {
   if (type == 'bigint') return String(datum) + 'n';
 
   if (type == 'object') {
-    if (!Object.values(datum).length) return '{  }';
-
-    // TODO: stringify object properties
+    const {id} = values.find(v => v.datum === datum);
+    const {length} = bindings.filter(b => b.objectId == id);
+    
+    return `{${'.'.repeat(length) || ' '}}`;
   } 
 
   return String(datum);
@@ -417,10 +487,8 @@ function stringifyAsExpected(type, datum) {
 function stringifyAsStored(type, datum) {
   if (type == 'symbol') return datum.description;
 
-  if (type == 'object') {
-    if (!Object.values(datum).length) return 'empty, no properties';
-
-    // TODO: stringify object properties
+  if (type == 'object' && !Object.values(datum).length) {
+    return 'empty, no properties';
   } 
 
   return String(datum);

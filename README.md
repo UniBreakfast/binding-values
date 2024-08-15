@@ -6,5 +6,11 @@
 - [x] show value bindings
 - [x] open value from binding
 - [x] open binding from value
-- [ ] collect garbage
-- [ ] add properties
+- [x] collect garbage
+- [x] add properties
+- [ ] prevent duplicate binding names
+- [ ] prevent invalid identifiers
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
