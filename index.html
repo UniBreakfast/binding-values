@@ -112,7 +112,7 @@
       <h4>Can't create binding entity</h4>
 
       <input type="hidden" name="id" value="{id}">
-      
+
       <p>
         Identifier
         '<b><output name="identifier">{name}</output></b>'
@@ -133,26 +133,52 @@
     </form>
   </dialog>
 
+  <dialog id="exist-prop">
+    <form method="dialog">
+      <h4>Property already exists</h4>
+
+      <output name="name">{name}</output>
+
+      <p>
+        and it is now reasigned to a new value<br>
+        without creating a new binding entity.
+      </p>
+
+      <div class="buttons">
+        <button value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="binding">
     <form method="dialog">
       <h5>Binding</h5>
 
       <input type="hidden" name="id" value="{id}">
 
-      <label>
-        <span>Kind of entity:</span>
-        <input name="kind" value="{kind}" readonly>
-      </label>
-
-      <h3>
-        <output name="name">{binding_name}</output>
-      </h3>
-
-      <label>
-        <span>Value:</span>
-
-        <input name="val" value="{datum}" readonly>
-      </label>
+      <fieldset>
+        <label>
+          <span>Kind of entity:</span>
+          <input name="kind" value="{kind}" readonly>
+        </label>
+  
+        <label class="object" hidden>
+          <span>of object:</span>
+          <button name="object" value="{id}">
+            {datum} bound to {binding_name}
+          </button>
+        </label>
+  
+        <h3>
+          <output name="name">{binding_name}</output>
+        </h3>
+  
+        <label>
+          <span>Value:</span>
+  
+          <input name="val" value="{datum}" readonly>
+        </label>
+      </fieldset>
 
       <div class="buttons">
         <button value="value">Jump to Value</button>

@@ -16,8 +16,12 @@ const noValuesSpan = newBindingValueLabel.nextElementSibling;
 const beenDeclaredDialog = document.getElementById('been-declared');
 const beenDeclaredForm = beenDeclaredDialog.firstElementChild;
 
+const existingPropDialog = document.getElementById('exist-prop');
+const existingPropForm = existingPropDialog.firstElementChild;
+
 const bindingDialog = document.getElementById('binding');
 const bindingForm = bindingDialog.firstElementChild;
+const bindingObjectLabel = bindingForm.querySelector('.object');
 const reassignBtn = bindingForm.querySelector('[value="reassign"]');
 
 const selectValueDialog = document.getElementById('select-value');
@@ -149,6 +153,16 @@ function handleNewBinding(e) {
         if (err.message.endsWith('has already been declared')) {
           showBeenDeclaredDialog(name);
           e.preventDefault();
+        } else if (err.message.startsWith('Existing property')) {
+          const id = +err.message.match(/id ([^\s)]+)/)[1];
+
+          showExistingPropertyDialog(name);
+          reassignBinding(id, valueId);
+
+          if (bindingsDialog.open) showBindings();
+          if (valuesDialog.open) showValues();
+          if (bindingDialog.open) showBinding(bindingForm.id.value);
+          if (valueDialog.open) showValue(valueForm.id.value);
         } else {
           throw err;
         }
@@ -170,7 +184,7 @@ function handleBinding(e) {
   const valueId = getValue(id).id;
 
   if (btn.value == 'value') e.preventDefault(), showValue(valueId)
-
+  if (btn.name == 'object') e.preventDefault(), showValue(btn.value);
   if (btn.value == 'reassign') e.preventDefault(), showSelectValue(id);
 }
 
@@ -262,7 +276,7 @@ function showBeenDeclaredDialog(name) {
   const binding = bindings.find(
     b => ['constant', 'variable'].includes(b.kind) && b.name == name
   );
-  const {id, kind} = binding;
+  const { id, kind } = binding;
 
   beenDeclaredForm.id.value = id;
   beenDeclaredForm.identifier.value = name;
@@ -275,13 +289,17 @@ function showBinding(id) {
   bindingDialog.showModal();
 
   const binding = bindings.find(b => b.id == id);
-  const { kind, name, valueId } = binding;
+  const { kind, name, valueId, objectId } = binding;
+  const object = objectId && values.find(v => v.id == objectId);
   const value = values.find(v => v.id == valueId);
   const { type, datum } = value || {};
   const readableValue = stringifyAsExpected(type, datum);
 
   bindingForm.id.value = id;
   bindingForm.kind.value = kind;
+  bindingObjectLabel.hidden = kind != 'property';
+  bindingForm.object.value = objectId;
+  bindingForm.object.innerText = makeObjectOption(object)?.innerText;
   bindingForm.name.value = name;
   bindingForm.val.value = readableValue;
   bindingForm.reassign.disabled = kind == 'constant';
@@ -327,6 +345,12 @@ function showDuplicateDialog(id) {
 
   duplicateForm.type.value = type;
   duplicateForm.datum.value = stringifyAsStored(type, datum);
+}
+
+function showExistingPropertyDialog(name) {
+  existingPropDialog.showModal();
+
+  existingPropForm.name.value = name;
 }
 
 function showValue(id) {
@@ -448,6 +472,16 @@ function createBinding(kind, name, valueId, objectId) {
     )
   ) {
     throw new Error(`Identifier '${name}' has already been declared`);
+  }
+
+  if (kind == 'property') {
+    const property = bindings.find(
+      b => b.objectId == objectId && b.name == name
+    );
+
+    if (property) {
+      throw new Error(`Existing property '${name}' (id ${property.id}) on an object`);
+    }
   }
 
   const id = ++lastId;

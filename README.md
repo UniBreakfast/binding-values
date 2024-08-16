@@ -9,8 +9,8 @@
 - [x] collect garbage
 - [x] add properties
 - [x] prevent duplicate binding names
+- [x] handle duplicate properties
 - [ ] prevent invalid identifiers
-- [ ] handle duplicate properties
 - [ ] 
 - [ ] 
 - [ ] 
