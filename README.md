@@ -8,9 +8,9 @@
 - [x] open binding from value
 - [x] collect garbage
 - [x] add properties
-- [ ] prevent duplicate binding names
+- [x] prevent duplicate binding names
 - [ ] prevent invalid identifiers
-- [ ] 
+- [ ] handle duplicate properties
 - [ ] 
 - [ ] 
 - [ ] 

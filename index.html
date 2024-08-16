@@ -107,6 +107,32 @@
     </form>
   </dialog>
 
+  <dialog id="been-declared">
+    <form method="dialog">
+      <h4>Can't create binding entity</h4>
+
+      <input type="hidden" name="id" value="{id}">
+      
+      <p>
+        Identifier
+        '<b><output name="identifier">{name}</output></b>'
+        has already been declared.
+      </p>
+
+      <p>
+        There's a
+        <output name="kind">{kind}</output>
+        <button value="binding">
+          <output name="name">{name}</output>
+        </button>
+      </p>
+
+      <div class="buttons">
+        <button value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="binding">
     <form method="dialog">
       <h5>Binding</h5>

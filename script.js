@@ -13,6 +13,9 @@ const noObjectsSpan = newBindingObjectLabel.nextElementSibling;
 const newBindingValueLabel = newBindingForm.querySelector('.value');
 const noValuesSpan = newBindingValueLabel.nextElementSibling;
 
+const beenDeclaredDialog = document.getElementById('been-declared');
+const beenDeclaredForm = beenDeclaredDialog.firstElementChild;
+
 const bindingDialog = document.getElementById('binding');
 const bindingForm = bindingDialog.firstElementChild;
 const reassignBtn = bindingForm.querySelector('[value="reassign"]');
@@ -73,6 +76,7 @@ bindingsForm.onsubmit = handleBindings;
 bindingForm.onsubmit = handleBinding;
 selectValueForm.onsubmit = handleSelectValue;
 newBindingForm.kind.onchange = showNewBindingForm;
+beenDeclaredForm.onsubmit = handleViewExisting;
 newBindingForm.onsubmit = handleNewBinding;
 valuesForm.onsubmit = handleValues;
 newValueForm.onsubmit = handleNewValue;
@@ -80,17 +84,17 @@ valueForm.onsubmit = handleValue;
 
 function handleClickOut(e) {
   if (!e.target.matches('dialog:not(#main-menu)')) return;
-  
+
   const dialog = e.target;
-  
+
   if (dialog) {
     dialog.close();
 
     const openDialog = document.querySelector('dialog[open]');
-    
+
     if (!openDialog) showMainMenu();
   }
-} 
+}
 
 function handleTypeChange(e) {
   if (!e.target.matches('select[name="type"]')) return;
@@ -113,16 +117,16 @@ function handleBindings(e) {
   if (btn.value == 'values') showValues();
   if (btn.value == 'create') e.preventDefault(), showNewBindingForm();
   if (btn.value == 'close') showMainMenu();
-  
+
   if (li) e.preventDefault(), showBinding(id);
 }
 
 function handleKindChange() {
   const kind = newBindingForm.kind.value;
 
-  newBindingObjectDiv.hidden = kind != 'property'; 
+  newBindingObjectDiv.hidden = kind != 'property';
 }
-  
+
 function handleNewBinding(e) {
   const btn = e.submitter;
 
@@ -137,11 +141,27 @@ function handleNewBinding(e) {
       newBindingForm.name.focus();
       e.preventDefault();
     } else {
-      createBinding(kind, name, valueId, objectId);
-      showBindings();
-      newBindingForm.name.value = '';
+      try {
+        createBinding(kind, name, valueId, objectId);
+        showBindings();
+        newBindingForm.name.value = '';
+      } catch (err) {
+        if (err.message.endsWith('has already been declared')) {
+          showBeenDeclaredDialog(name);
+          e.preventDefault();
+        } else {
+          throw err;
+        }
+      }
     }
   }
+}
+
+function handleViewExisting(e) {
+  const btn = e.submitter;
+  const id = beenDeclaredForm.id.value;
+
+  if (btn.value == 'binding') showBinding(id);
 }
 
 function handleBinding(e) {
@@ -150,7 +170,7 @@ function handleBinding(e) {
   const valueId = getValue(id).id;
 
   if (btn.value == 'value') e.preventDefault(), showValue(valueId)
-  
+
   if (btn.value == 'reassign') e.preventDefault(), showSelectValue(id);
 }
 
@@ -159,14 +179,14 @@ function handleSelectValue(e) {
   const id = selectValueForm.id.value;
   const li = btn.closest('li');
   const valueId = li?.dataset.id;
-  
+
   if (valueId) {
     reassignBinding(id, valueId);
-    
+
     if (bindingsDialog.open) showBindings();
     if (valuesDialog.open) showValues();
     if (valueDialog.open) showValue(valueForm.id.value);
-    
+
     showBinding(id);
   }
 }
@@ -226,7 +246,7 @@ function showNewBindingForm() {
   const noObjects = !objectValues.length;
   const noValues = !valueOptions.length;
   const propSelected = newBindingForm.kind.value == 'property';
-  
+
   newBindingForm.object.replaceChildren(...objectOptions);
   newBindingForm.val.replaceChildren(...valueOptions);
   newBindingObjectLabel.hidden = !propSelected || noObjects;
@@ -234,6 +254,20 @@ function showNewBindingForm() {
   newBindingValueLabel.hidden = noValues;
   noValuesSpan.hidden = !noValues;
   newBindingForm.create.disabled = propSelected && noObjects || noValues;
+}
+
+function showBeenDeclaredDialog(name) {
+  beenDeclaredDialog.showModal();
+
+  const binding = bindings.find(
+    b => ['constant', 'variable'].includes(b.kind) && b.name == name
+  );
+  const {id, kind} = binding;
+
+  beenDeclaredForm.id.value = id;
+  beenDeclaredForm.identifier.value = name;
+  beenDeclaredForm.kind.value = kind;
+  beenDeclaredForm.name.value = name;
 }
 
 function showBinding(id) {
@@ -249,7 +283,7 @@ function showBinding(id) {
   bindingForm.id.value = id;
   bindingForm.kind.value = kind;
   bindingForm.name.value = name;
-  bindingForm.val.value = readableValue;  
+  bindingForm.val.value = readableValue;
   bindingForm.reassign.disabled = kind == 'constant';
   bindingForm.reassign.title = kind == 'constant' ? 'Cannot reassign constant' : '';
 }
@@ -257,7 +291,7 @@ function showBinding(id) {
 function showSelectValue(id) {
   const binding = bindings.find(b => b.id == id);
   const { kind, name, valueId } = binding;
-  
+
   selectValueDialog.showModal();
   selectValueForm.id.value = id;
   selectValueForm.label.value = `${kind} ${name}`;
@@ -306,7 +340,7 @@ function showValue(id) {
   const noProperties = !properties.length;
   const propertyItems = properties.map(makePropertyItem);
   const bindingItems = bindings.map(makeBindingNameItem);
-  
+
   valueForm.id.value = id;
   valueForm.type.value = type;
   valueForm.datum.value = stringifyAsStored(type, datum);
@@ -321,12 +355,12 @@ function showValue(id) {
 function filterLabelsByType(form) {
   const selectedType = form.type.value;
   const labels = form.querySelectorAll('label:not(:has([name="type"]))');
-  
+
   for (const label of labels) {
     const el = label.querySelector('[name]');
     const type = el.name;
     const matches = type == selectedType;
-    
+
     label.hidden = !matches;
   }
 }
@@ -334,11 +368,11 @@ function filterLabelsByType(form) {
 function makeBindingItem(binding) {
   const { id, kind, name, valueId } = binding;
   const value = values.find(v => v.id == valueId);
-  const {type, datum} = value || {};
+  const { type, datum } = value || {};
   const readableValue = stringifyAsExpected(type, datum);
   const item = bindingTemplate.cloneNode(true);
   const btn = item.firstElementChild;
-  const label = kind == 'constant' ? `<u>${name}</u> =` : 
+  const label = kind == 'constant' ? `<u>${name}</u> =` :
     kind == 'variable' ? `<i>${name}</i> =` : `${name}:`;
 
   item.dataset.id = id;
@@ -353,7 +387,7 @@ function makeBindingNameItem(binding) {
 
   const item = valueBindingTemplate.cloneNode(true);
   const button = item.firstElementChild;
-  const label = kind == 'constant' ? `<u>${name}</u>` : 
+  const label = kind == 'constant' ? `<u>${name}</u>` :
     kind == 'variable' ? `<i>${name}</i>` : `.${name}`
 
   item.dataset.id = id;
@@ -365,7 +399,7 @@ function makeBindingNameItem(binding) {
 function makePropertyItem(binding) {
   const { id, name, valueId } = binding;
   const value = values.find(v => v.id == valueId);
-  const {type, datum} = value || {};
+  const { type, datum } = value || {};
   const readableValue = stringifyAsExpected(type, datum);
   const item = valuePropsTemplate.cloneNode(true);
   const btn = item.firstElementChild;
@@ -392,21 +426,30 @@ function makeValueItem(value) {
 
 function makeValueOption(value) {
   const { id, type, datum } = value;
-  
+
   return new Option(stringifyAsExpected(type, datum), id);
 }
 
 function makeObjectOption(value) {
   const { id, type, datum } = value;
-  const names = getBindings(id).map(b => b.name); 
-  const label = names.length ? 
+  const names = getBindings(id).map(b => b.name);
+  const label = names.length ?
     `${stringifyAsExpected(type, datum)} bound to ${names.join(', ')}` :
     `unbound ${stringifyAsExpected(type, datum)}`;
-  
+
   return new Option(label, id);
 }
 
 function createBinding(kind, name, valueId, objectId) {
+  if (
+    ['constant', 'variable'].includes(kind) &&
+    bindings.some(
+      b => ['constant', 'variable'].includes(b.kind) && b.name == name
+    )
+  ) {
+    throw new Error(`Identifier '${name}' has already been declared`);
+  }
+
   const id = ++lastId;
   const binding = { id, kind, name, valueId };
 
@@ -425,11 +468,11 @@ function createValue(type, datum) {
   if (type == 'bigint') datum = BigInt(datum);
   if (type == 'symbol') datum = Symbol(datum);
   if (type == 'object') datum = {};
-  
+
   const dupId = checkForDuplicateValue(datum);
 
   if (dupId) return showDuplicateDialog(dupId);
-  
+
   const value = { id, type, datum };
 
   values.unshift(value);
@@ -475,11 +518,11 @@ function stringifyAsExpected(type, datum) {
   if (type == 'bigint') return String(datum) + 'n';
 
   if (type == 'object') {
-    const {id} = values.find(v => v.datum === datum);
-    const {length} = bindings.filter(b => b.objectId == id);
-    
+    const { id } = values.find(v => v.datum === datum);
+    const { length } = bindings.filter(b => b.objectId == id);
+
     return `{${'.'.repeat(length) || ' '}}`;
-  } 
+  }
 
   return String(datum);
 }
@@ -489,7 +532,7 @@ function stringifyAsStored(type, datum) {
 
   if (type == 'object' && !Object.values(datum).length) {
     return 'empty, no properties';
-  } 
+  }
 
   return String(datum);
 }
