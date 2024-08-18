@@ -107,6 +107,26 @@
     </form>
   </dialog>
 
+  <dialog id="invalid-identifier">
+    <form method="dialog">
+      <h4>Invalid identifier</h4>
+
+      <p>
+        Identifier '<b><output name="name">{name}</output></b>' is not valid.
+      </p>
+
+      <p>
+        It must start with a letter, underscore or dollar sign<br>
+        and can contain only letters, digits, underscores<br>
+        and dollar signs.
+      </p>
+
+      <div class="buttons">
+        <button value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="been-declared">
     <form method="dialog">
       <h4>Can't create binding entity</h4>

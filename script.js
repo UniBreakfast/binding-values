@@ -13,6 +13,9 @@ const noObjectsSpan = newBindingObjectLabel.nextElementSibling;
 const newBindingValueLabel = newBindingForm.querySelector('.value');
 const noValuesSpan = newBindingValueLabel.nextElementSibling;
 
+const invalidIdentifierDialog = document.getElementById('invalid-identifier');
+const invalidIdentifierForm = invalidIdentifierDialog.firstElementChild;
+
 const beenDeclaredDialog = document.getElementById('been-declared');
 const beenDeclaredForm = beenDeclaredDialog.firstElementChild;
 
@@ -141,18 +144,21 @@ function handleNewBinding(e) {
     const valueId = +newBindingForm.val.value;
 
     if (!name) {
+      e.preventDefault();
       newBindingForm.name.value = '';
       newBindingForm.name.focus();
-      e.preventDefault();
     } else {
       try {
         createBinding(kind, name, valueId, objectId);
         showBindings();
         newBindingForm.name.value = '';
       } catch (err) {
-        if (err.message.endsWith('has already been declared')) {
-          showBeenDeclaredDialog(name);
+        if (err.message.startsWith('Invalid identifier')) {
           e.preventDefault();
+          showInvalidIdentifierDialog(name);
+        } else if (err.message.endsWith('has already been declared')) {
+          e.preventDefault();
+          showBeenDeclaredDialog(name);
         } else if (err.message.startsWith('Existing property')) {
           const id = +err.message.match(/id ([^\s)]+)/)[1];
 
@@ -268,6 +274,12 @@ function showNewBindingForm() {
   newBindingValueLabel.hidden = noValues;
   noValuesSpan.hidden = !noValues;
   newBindingForm.create.disabled = propSelected && noObjects || noValues;
+}
+
+function showInvalidIdentifierDialog(name) {
+  invalidIdentifierDialog.showModal();
+
+  invalidIdentifierForm.name.value = name;
 }
 
 function showBeenDeclaredDialog(name) {
@@ -467,6 +479,13 @@ function makeObjectOption(value) {
 function createBinding(kind, name, valueId, objectId) {
   if (
     ['constant', 'variable'].includes(kind) &&
+    !isValidIdentifier(name)
+  ) {
+    throw new Error(`Invalid identifier '${name}'`);
+  }
+
+  if (
+    ['constant', 'variable'].includes(kind) &&
     bindings.some(
       b => ['constant', 'variable'].includes(b.kind) && b.name == name
     )
@@ -569,4 +588,8 @@ function stringifyAsStored(type, datum) {
   }
 
   return String(datum);
+}
+
+function isValidIdentifier(name) {
+  return /^[\p{L}\p{Nl}$_][\p{L}\p{Nl}\p{Nd}$\u200C\u200D]*$/u.test(name);
 }
