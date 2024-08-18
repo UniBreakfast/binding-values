@@ -74,7 +74,6 @@ const values = [
 let lastId = 0;
 
 showMainMenu();
-// showBindings();
 
 window.onpointerdown = handleClickOut;
 window.onchange = handleTypeChange;
@@ -192,6 +191,14 @@ function handleBinding(e) {
   if (btn.value == 'value') e.preventDefault(), showValue(valueId)
   if (btn.name == 'object') e.preventDefault(), showValue(btn.value);
   if (btn.value == 'reassign') e.preventDefault(), showSelectValue(id);
+
+  if (btn.value == 'delete') {
+    deleteBinding(id);
+
+    if (bindingsDialog.open) showBindings();
+    if (valuesDialog.open) showValues();
+    if (valueDialog.open) showValue(valueForm.id.value);
+  }
 }
 
 function handleSelectValue(e) {
@@ -315,6 +322,8 @@ function showBinding(id) {
   bindingForm.val.value = readableValue;
   bindingForm.reassign.disabled = kind == 'constant';
   bindingForm.reassign.title = kind == 'constant' ? 'Cannot reassign constant' : '';
+  bindingForm.delete.disabled = kind != 'property';
+  bindingForm.delete.title = kind != 'property' ? 'Only object properties can be deleted' : '';
 
   if (object) {
     bindingForm.object.innerText = makeObjectOption(object)?.innerText;
@@ -519,6 +528,12 @@ function createBinding(kind, name, valueId, objectId) {
   if (kind == 'property') binding.objectId = objectId;
 
   bindings.unshift(binding);
+}
+
+function deleteBinding(id) {
+  const index = bindings.findIndex(b => b.id == id);
+
+  bindings.splice(index, 1);
 }
 
 function createValue(type, datum) {

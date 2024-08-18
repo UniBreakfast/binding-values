@@ -12,5 +12,5 @@
 - [x] handle duplicate properties
 - [x] prevent invalid identifiers
 - [x] collect bound to unbound
-- [ ] delete properties
+- [x] delete properties
 - [ ] 
