@@ -11,6 +11,6 @@
 - [x] prevent duplicate binding names
 - [x] handle duplicate properties
 - [x] prevent invalid identifiers
-- [ ] collect bound to unbound
+- [x] collect bound to unbound
 - [ ] delete properties
 - [ ] 

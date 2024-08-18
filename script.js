@@ -57,7 +57,7 @@ const bindings = [
   { id: -1, kind: 'constant', name: 'binding1', valueId: -1 },
   { id: -2, kind: 'constant', name: 'binding2', valueId: -2 },
   { id: -3, kind: 'variable', name: 'binding3', valueId: -3 },
-  { id: -4, kind: 'constant', name: 'obj', valueId: -6 },
+  { id: -4, kind: 'variable', name: 'obj', valueId: -6 },
   { id: -5, kind: 'property', name: 'a', valueId: -2, objectId: -6 },
   { id: -6, kind: 'property', name: 'b', valueId: -3, objectId: -6 },
 ]
@@ -311,11 +311,14 @@ function showBinding(id) {
   bindingForm.kind.value = kind;
   bindingObjectLabel.hidden = kind != 'property';
   bindingForm.object.value = objectId;
-  bindingForm.object.innerText = makeObjectOption(object)?.innerText;
   bindingForm.name.value = name;
   bindingForm.val.value = readableValue;
   bindingForm.reassign.disabled = kind == 'constant';
   bindingForm.reassign.title = kind == 'constant' ? 'Cannot reassign constant' : '';
+
+  if (object) {
+    bindingForm.object.innerText = makeObjectOption(object)?.innerText;
+  }
 }
 
 function showSelectValue(id) {
@@ -326,7 +329,10 @@ function showSelectValue(id) {
   selectValueForm.id.value = id;
   selectValueForm.label.value = `${kind} ${name}`;
 
-  const selectValueItems = values.map(makeValueItem);
+  const boundValues = getBoundValues();
+  const selectValueItems = values.map(
+    v => makeValueItem(v, boundValues.includes(v))
+  );
   const currentValueItem = selectValueItems.find(item => item.dataset.id == valueId);
   const currentValueButton = currentValueItem.firstElementChild;
 
@@ -338,7 +344,11 @@ function showSelectValue(id) {
 function showValues() {
   valuesDialog.showModal();
 
-  const valueItems = values.map(makeValueItem);
+  const boundValues = getBoundValues();
+
+  const valueItems = values.map(
+    v => makeValueItem(v, boundValues.includes(v))
+  );
 
   valuesList.replaceChildren(...valueItems);
 }
@@ -446,7 +456,7 @@ function makePropertyItem(binding) {
   return item;
 }
 
-function makeValueItem(value) {
+function makeValueItem(value, bound) {
   const { id, type, datum } = value;
   const item = valueTemplate.cloneNode(true);
   const btn = item.firstElementChild;
@@ -455,7 +465,7 @@ function makeValueItem(value) {
 
   btn.innerText = stringifyAsExpected(type, datum);
 
-  if (getBindings(id).length) btn.classList.remove('unbound');
+  if (bound) btn.classList.remove('unbound');
 
   return item;
 }
@@ -537,9 +547,35 @@ function checkForDuplicateValue(datum) {
   return value?.id;
 }
 
-function collectGarbage() {
-  const boundIds = new Set(bindings.map(b => b.valueId));
+function getBoundValues() {
+  const boundIds = new Set();
+  const leads = bindings.filter(b => b.kind == 'constant' || b.kind == 'variable');
+  const pastLeads = new Set();
+
+  while (leads.length) {
+    const lead = leads.pop();
+    const { valueId } = lead;
+    const value = values.find(v => v.id == valueId);
+
+    if (pastLeads.has(lead.id)) continue;
+
+    pastLeads.add(lead.id);
+    boundIds.add(valueId);
+
+    if (value.type == 'object') {
+      const properties = bindings.filter(b => b.objectId == valueId);
+
+      leads.push(...properties);
+    }
+  }
+
   const boundValues = values.filter(v => boundIds.has(v.id));
+
+  return boundValues;
+}
+
+function collectGarbage() {
+  const boundValues = getBoundValues();
 
   values.length = 0;
   values.push(...boundValues);
