@@ -54,21 +54,21 @@ const valueBindingList = valueBoundLabel.querySelector('ul');
 const valueBindingTemplate = valueBindingList.firstElementChild.content.firstElementChild;
 
 const bindings = [
-  { id: -1, kind: 'constant', name: 'binding1', valueId: -1 },
-  { id: -2, kind: 'constant', name: 'binding2', valueId: -2 },
-  { id: -3, kind: 'variable', name: 'binding3', valueId: -3 },
-  { id: -4, kind: 'variable', name: 'obj', valueId: -6 },
-  { id: -5, kind: 'property', name: 'a', valueId: -2, objectId: -6 },
-  { id: -6, kind: 'property', name: 'b', valueId: -3, objectId: -6 },
+  // { id: -1, kind: 'constant', name: 'binding1', valueId: -1 },
+  // { id: -2, kind: 'constant', name: 'binding2', valueId: -2 },
+  // { id: -3, kind: 'variable', name: 'binding3', valueId: -3 },
+  // { id: -4, kind: 'variable', name: 'obj', valueId: -6 },
+  // { id: -5, kind: 'property', name: 'a', valueId: -2, objectId: -6 },
+  // { id: -6, kind: 'property', name: 'b', valueId: -3, objectId: -6 },
 ]
 
 const values = [
-  { id: -1, type: 'undefined', datum: undefined },
-  { id: -2, type: 'number', datum: 42 },
-  { id: -3, type: 'string', datum: 'hello world' },
-  { id: -4, type: 'boolean', datum: false },
-  { id: -5, type: 'symbol', datum: Symbol('abc') },
-  { id: -6, type: 'object', datum: {} },
+  // { id: -1, type: 'undefined', datum: undefined },
+  // { id: -2, type: 'number', datum: 42 },
+  // { id: -3, type: 'string', datum: 'hello world' },
+  // { id: -4, type: 'boolean', datum: false },
+  // { id: -5, type: 'symbol', datum: Symbol('abc') },
+  // { id: -6, type: 'object', datum: {} },
 ]
 
 let lastId = 0;
@@ -120,7 +120,6 @@ function handleBindings(e) {
   const li = btn.closest('li');
   const id = li?.dataset.id;
 
-  if (btn.value == 'values') showValues();
   if (btn.value == 'create') e.preventDefault(), showNewBindingForm();
   if (btn.value == 'close') showMainMenu();
 
@@ -223,7 +222,6 @@ function handleValues(e) {
   const li = btn.closest('li');
   const id = li?.dataset.id;
 
-  if (btn.value == 'bindings') showBindings();
   if (btn.value == 'create') e.preventDefault(), showNewValueForm();
   if (btn.value == 'close') showMainMenu();
   if (btn.value == 'garbage') e.preventDefault(), collectGarbage(), showValues();
